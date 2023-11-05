@@ -62,13 +62,18 @@ const getCurrent = async (req, res) => {
 	})
 }
 const updateAvatar = async (req, res) => {
-	const { _id: owner } = req.user
-	const { path: oldPath, filename } = req.file
-	const newPath = path.join(avatarPath, filename)
-	await fs.rename(oldPath, newPath)
-	const avatarURL = path.join('avatars', filename)
-	const result = User.create({ ...req.body, owner, avatarURL })
-	res.status(201).json(result)
+	try {
+		const user = req.user
+		const { path: oldPath, filename } = req.file
+		const newPath = path.join(avatarPath, filename)
+		await fs.rename(oldPath, newPath)
+		const avatarURL = path.join('avatars', filename)
+		user.avatarURL = avatarURL
+		await user.save()
+		res.status(201).json(user)
+	} catch (error) {
+		throw HttpError(500, 'Avatar update failed')
+	}
 }
 const signout = async (req, res) => {
 	const { _id } = req.user
