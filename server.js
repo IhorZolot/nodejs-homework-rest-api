@@ -1,12 +1,8 @@
 import mongoose from 'mongoose'
-
 import app from './app.js'
-// aMqMWWXOCzzq1aWS
-const DB_HOST =
-	'mongodb+srv://Ihor:aMqMWWXOCzzq1aWS@cluster0.hzc4eni.mongodb.net/my-contacts?retryWrites=true&w=majority'
 
 mongoose
-	.connect(DB_HOST)
+	.connect(process.env.DB_HOST)
 	.then(() => {
 		console.log('Database connection successful')
 		app.listen(3000, () => {

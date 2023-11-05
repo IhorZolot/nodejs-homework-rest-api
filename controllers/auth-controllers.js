@@ -1,10 +1,18 @@
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
-
+import dotenv from 'dotenv'
+import gravatar from 'gravatar'
+import fs from 'fs/promises'
+import path from 'path'
 import User from '../models/User.js'
 
 import { HttpError } from '../helpers/index.js'
 import { ctrlWrapper } from '../decorators/index.js'
+
+const avatarPath = path.resolve('public', 'avatars')
+
+dotenv.config()
+
 const { JWT_SECRET } = process.env
 
 const signup = async (req, res) => {
@@ -16,11 +24,14 @@ const signup = async (req, res) => {
 	if (!email || !password) {
 		return res.status(400).json({ error: 'All fields must be filled' })
 	}
-	const hashPassword = await bcrypt.hash(password, 10)
-	const newUser = await User.create({ ...req.body, password: hashPassword })
+	const avatarURL = gravatar.url(email, { s: '200', r: 'pg', d: 'mm' })
+
+	const hashPassword = await bcrypt.hash(password, 6)
+	const newUser = await User.create({ ...req.body, password: hashPassword, avatarURL })
 	res.status(201).json({
 		username: newUser.username,
 		email: newUser.email,
+		avatarURL: newUser.avatarURL,
 	})
 }
 const signin = async (req, res) => {
@@ -50,6 +61,15 @@ const getCurrent = async (req, res) => {
 		email,
 	})
 }
+const updateAvatar = async (req, res) => {
+	const { _id: owner } = req.user
+	const { path: oldPath, filename } = req.file
+	const newPath = path.join(avatarPath, filename)
+	await fs.rename(oldPath, newPath)
+	const avatarURL = path.join('avatars', filename)
+	const result = User.create({ ...req.body, owner, avatarURL })
+	res.status(201).json(result)
+}
 const signout = async (req, res) => {
 	const { _id } = req.user
 	await User.findByIdAndUpdate(_id, { token: '' })
@@ -62,4 +82,5 @@ export default {
 	signin: ctrlWrapper(signin),
 	signout: ctrlWrapper(signout),
 	getCurrent: ctrlWrapper(getCurrent),
+	updateAvatar: ctrlWrapper(updateAvatar),
 }
