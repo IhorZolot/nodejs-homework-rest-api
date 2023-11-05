@@ -72,7 +72,7 @@ const updateAvatar = async (req, res) => {
 		await user.save()
 		res.status(201).json(user)
 	} catch (error) {
-		throw HttpError(500, 'Avatar update failed')
+		throw HttpError(401)
 	}
 }
 const signout = async (req, res) => {
