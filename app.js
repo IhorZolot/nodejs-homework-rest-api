@@ -1,9 +1,13 @@
 import express from 'express'
 import logger from 'morgan'
 import cors from 'cors'
+import dotenv from 'dotenv'
 
 import authRouter from './routes/api/auth-routes.js'
 import contactsRouter from './routes/api/contacts-routes.js'
+
+dotenv.config()
+
 const app = express()
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
@@ -11,8 +15,10 @@ const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 app.use(logger(formatsLogger))
 app.use(cors())
 app.use(express.json())
+app.use(express.static('public'))
 
 app.use('/api/auth', authRouter)
+app.use('/user', authRouter)
 app.use('/api/contacts', contactsRouter)
 
 app.use((req, res) => {

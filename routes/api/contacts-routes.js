@@ -8,11 +8,8 @@ const contactsRouter = express.Router()
 contactsRouter.use(authenticate)
 
 contactsRouter.get('/', contactsControllers.getAll)
-
 contactsRouter.get('/:id', isValidId, contactsControllers.getById)
-
 contactsRouter.post('/', validateBody(contactAddSchema), contactsControllers.add)
-
 contactsRouter.put('/:id', isValidId, validateBody(contactUpdateSchema), contactsControllers.updateById)
 contactsRouter.patch(
 	'/:id/favorite',
